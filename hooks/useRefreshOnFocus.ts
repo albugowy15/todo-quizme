@@ -7,7 +7,6 @@ export function useRefreshOnFocus(refetch: () => void) {
   useFocusEffect(
     React.useCallback(() => {
       if (enabledRef.current) {
-        console.log("refetch happen");
         refetch();
       } else {
         enabledRef.current = true;

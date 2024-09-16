@@ -5,6 +5,8 @@ import { DatabaseProvider } from "../providers/DatabaseProvider";
 import { QueryProvider } from "../providers/QueryProvier";
 import * as Notifications from "expo-notifications";
 import useNotifications from "../hooks/useNotifications";
+import { RootSiblingParent } from "react-native-root-siblings";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -21,26 +23,28 @@ export default function RootLayout() {
     <QueryProvider>
       <React.Suspense fallback={<Text>Loading...</Text>}>
         <DatabaseProvider>
-          <Stack>
-            <Stack.Screen
-              name="index"
-              options={{
-                headerTitle: "Home",
-              }}
-            />
-            <Stack.Screen
-              name="add-todo"
-              options={{
-                headerTitle: "Add Todo",
-              }}
-            />
-            <Stack.Screen
-              name="edit/[todoID]"
-              options={{
-                headerTitle: "Edit Todo",
-              }}
-            />
-          </Stack>
+          <RootSiblingParent>
+            <Stack>
+              <Stack.Screen
+                name="index"
+                options={{
+                  headerTitle: "Home",
+                }}
+              />
+              <Stack.Screen
+                name="add-todo"
+                options={{
+                  headerTitle: "Add Todo",
+                }}
+              />
+              <Stack.Screen
+                name="edit/[todoID]"
+                options={{
+                  headerTitle: "Edit Todo",
+                }}
+              />
+            </Stack>
+          </RootSiblingParent>
         </DatabaseProvider>
       </React.Suspense>
     </QueryProvider>

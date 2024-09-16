@@ -2,39 +2,50 @@ import { Button, Input } from "@rneui/themed";
 import { useMutation } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import * as React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import type { DateType } from "react-native-ui-datepicker";
 import DatePickerDialog from "./DatePickerDialog";
 import { useRouter } from "expo-router";
+import { showToast } from "../lib/toast";
 
-export function useTodoForm(mutationFn: () => any) {
+export function useTodoForm({
+  mutationFn,
+  toastMessage,
+}: {
+  mutationFn: () => any;
+  toastMessage: string;
+}) {
   const [title, setTitle] = React.useState("");
   const [deadline, setDeadline] = React.useState<DateType | undefined>();
   const [dialogVisible, setDialogVisible] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
   const router = useRouter();
   const mutation = useMutation({
     mutationFn: mutationFn,
     onSuccess: () => {
+      showToast({
+        msg: toastMessage,
+      });
       router.dismiss();
     },
   });
   const onSaveTodo = () => {
     if (title === "") {
-      setError("Title cannot be empty");
+      showToast({ msg: "Title cannot be empty", variant: "error" });
       return;
     }
     if (!deadline) {
-      setError("Deadline cannot be empty");
+      showToast({ msg: "Deadline cannot be empty", variant: "error" });
       return;
     }
     const today = dayjs();
     const diff = dayjs(deadline).diff(today, "second");
     if (diff < 0) {
-      setError("Cannot chose deadline before today");
+      showToast({
+        msg: "Cannot chose deadline before today",
+        variant: "error",
+      });
       return;
     }
-    setError(null);
     mutation.mutate();
   };
   return {
@@ -44,8 +55,6 @@ export function useTodoForm(mutationFn: () => any) {
     setDeadline,
     dialogVisible,
     setDialogVisible,
-    error,
-    setError,
     mutation,
     onSaveTodo,
   };
@@ -59,7 +68,6 @@ export interface TodoFormProps {
   setTitle: React.Dispatch<React.SetStateAction<string>>;
   setDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onSaveTodo: () => void;
-  error: string | null;
 }
 export const TodoForm = ({
   title,
@@ -69,7 +77,6 @@ export const TodoForm = ({
   setTitle,
   setDialogVisible,
   onSaveTodo,
-  error,
 }: TodoFormProps) => {
   return (
     <View style={{ padding: 10 }}>
@@ -94,27 +101,6 @@ export const TodoForm = ({
         setVisible={setDialogVisible}
       />
       <Button title="Save" onPress={onSaveTodo} />
-      {error && (
-        <View
-          style={{
-            borderWidth: 2,
-            padding: 5,
-            borderRadius: 5,
-            borderColor: "rgb(225 29 72)",
-            marginTop: 10,
-          }}
-        >
-          <Text
-            style={{
-              fontWeight: "bold",
-              color: "rgb(225 29 72)",
-              fontSize: 16,
-            }}
-          >
-            Error: {error}
-          </Text>
-        </View>
-      )}
     </View>
   );
 };

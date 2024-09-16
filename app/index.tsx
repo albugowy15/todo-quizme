@@ -12,6 +12,7 @@ import {
   type FilterState,
 } from "../services/todo";
 import { TodoItemCard } from "../components/TodoItemCard";
+import { showToast } from "../lib/toast";
 
 export default function Page() {
   const [filterTodos, setFilterTodos] = React.useState<FilterState>("ACTIVE");
@@ -24,11 +25,17 @@ export default function Page() {
   const router = useRouter();
   const mutateTodoDone = useMutation({
     mutationFn: (todoID: number) => toggleTodoActive(db, todoID),
-    onSuccess: () => refetch(),
+    onSuccess: () => {
+      showToast({ msg: "Todo active status updated!" });
+      refetch();
+    },
   });
   const mutateDeleteTodo = useMutation({
     mutationFn: (todoID: number) => deleteTodo(db, todoID),
-    onSuccess: () => refetch(),
+    onSuccess: () => {
+      showToast({ msg: "Todo deleted!" });
+      refetch();
+    },
   });
   React.useEffect(() => {
     refetch();

@@ -13,12 +13,14 @@ export default function EditTodoPage() {
     queryKey: [`todos/${todoID}`],
     queryFn: () => getTodo(db, id),
   });
-  const todoForm = useTodoForm(() =>
-    updateTodo(db, id, {
-      title: todoForm.title,
-      deadline: todoForm.deadline?.toLocaleString() ?? "",
-    }),
-  );
+  const todoForm = useTodoForm({
+    mutationFn: () =>
+      updateTodo(db, id, {
+        title: todoForm.title,
+        deadline: todoForm.deadline?.toLocaleString() ?? "",
+      }),
+    toastMessage: "Todo updated!",
+  });
 
   React.useEffect(() => {
     if (data) {
