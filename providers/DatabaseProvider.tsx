@@ -15,7 +15,7 @@ async function migrateDB(db: SQLiteDatabase) {
 
 const DatabaseProvider = ({ children }: { children: React.ReactNode }) => {
   return (
-    <SQLiteProvider databaseName="test.db" onInit={migrateDB}>
+    <SQLiteProvider databaseName="todos.db" onInit={migrateDB}>
       {children}
     </SQLiteProvider>
   );

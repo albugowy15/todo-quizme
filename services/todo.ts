@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { SQLiteDatabase } from "expo-sqlite";
-import * as Notifications from "expo-notifications";
+import { cancelNotification, sendNotification } from "./notification";
 
 interface Todo {
   id: number;
@@ -10,34 +10,29 @@ interface Todo {
   notificationId: string;
 }
 
-type GetTodosRes = Omit<Todo, "notificationId">;
 export const getTodos = async (db: SQLiteDatabase) => {
-  return await db.getAllAsync<GetTodosRes>("SELECT * FROM todos;");
+  return await db.getAllAsync<Todo>("SELECT * FROM todos;");
 };
 
-type GetTodosByActiveRes = Omit<Todo, "notificationId">;
 export type FilterState = "ALL" | "ACTIVE" | "DONE";
 export const getTodosByActive = async (
   db: SQLiteDatabase,
   filter: FilterState,
 ) => {
   if (filter == "ALL")
-    return await db.getAllAsync<GetTodosByActiveRes>(
-      "SELECT * FROM todos ORDER BY deadline;",
-    );
+    return await db.getAllAsync<Todo>("SELECT * FROM todos ORDER BY deadline;");
   if (filter == "ACTIVE")
-    return await db.getAllAsync<GetTodosByActiveRes>(
+    return await db.getAllAsync<Todo>(
       "SELECT * FROM todos WHERE active = 1 ORDER BY deadline;",
     );
   if (filter == "DONE")
-    return await db.getAllAsync<GetTodosByActiveRes>(
+    return await db.getAllAsync<Todo>(
       "SELECT * FROM todos WHERE active = 0 ORDER BY deadline;",
     );
 };
 
-type GetTodoRes = Omit<Todo, "notificationId">;
 export const getTodo = async (db: SQLiteDatabase, todoID: number) => {
-  return await db.getFirstAsync<GetTodoRes>(
+  return await db.getFirstAsync<Todo>(
     "SELECT * FROM todos WHERE id = ?;",
     todoID,
   );
@@ -47,12 +42,9 @@ type AddTodoReq = Pick<Todo, "title" | "deadline">;
 export const addTodo = async (db: SQLiteDatabase, value: AddTodoReq) => {
   const today = dayjs();
   const diff = dayjs(value.deadline).diff(today, "second");
-  const notificationId = await Notifications.scheduleNotificationAsync({
-    content: {
-      title: `You've task todo`,
-      body: value.title,
-    },
-    trigger: { seconds: diff },
+  const notificationId = await sendNotification({
+    body: value.title,
+    seconds: diff,
   });
   try {
     await db.runAsync(
@@ -63,7 +55,7 @@ export const addTodo = async (db: SQLiteDatabase, value: AddTodoReq) => {
       notificationId,
     );
   } catch (error) {
-    await Notifications.cancelScheduledNotificationAsync(notificationId);
+    await cancelNotification(notificationId);
     console.error("Error save todo:", error);
   }
 };
@@ -84,29 +76,31 @@ export async function updateTodo(
   if (data.notificationId === "") {
     throw new Error("notificationId is empty");
   }
-  await Notifications.cancelScheduledNotificationAsync(data.notificationId);
+  await cancelNotification(data.notificationId);
 
   const today = dayjs();
   const diff = dayjs(value.deadline).diff(today, "second");
-  const notificationId = await Notifications.scheduleNotificationAsync({
-    content: {
-      title: `You've task todo`,
-      body: value.title,
-    },
-    trigger: { seconds: diff },
+  const notificationID = await sendNotification({
+    body: value.title,
+    seconds: diff,
   });
-  await db.runAsync(
-    "UPDATE todos SET title = ?, deadline = ?, notificationId = ? WHERE id = ?",
-    value.title,
-    value.deadline,
-    notificationId,
-    todoID,
-  );
+  try {
+    await db.runAsync(
+      "UPDATE todos SET title = ?, deadline = ?, notificationId = ? WHERE id = ?",
+      value.title,
+      value.deadline,
+      notificationID,
+      todoID,
+    );
+  } catch (error) {
+    await cancelNotification(notificationID);
+    console.error("Error update todo:", error);
+  }
 }
 
 export async function toggleTodoActive(db: SQLiteDatabase, todoID: number) {
   const data = await db.getFirstAsync<Todo>(
-    "SELECT id, title, notificationId, deadline, active FROM todos WHERE id = ?",
+    "SELECT * FROM todos WHERE id = ?",
     todoID,
   );
   if (!data) {
@@ -118,29 +112,31 @@ export async function toggleTodoActive(db: SQLiteDatabase, todoID: number) {
   if (data.active === 1) {
     // set done
     await db.runAsync("UPDATE todos SET active = 0 WHERE id = ?", todoID);
-    await Notifications.cancelScheduledNotificationAsync(data.notificationId);
+    await cancelNotification(data.notificationId);
   } else {
     // set undone
     const today = dayjs();
     const diff = dayjs(data.deadline).diff(today, "second");
-    const notificationId = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: `You've task todo`,
-        body: data.title,
-      },
-      trigger: { seconds: diff },
+    const notificationID = await sendNotification({
+      body: data.title,
+      seconds: diff,
     });
-    await db.runAsync(
-      "UPDATE todos SET active = 1, notificationId = ? WHERE id = ?",
-      notificationId,
-      todoID,
-    );
+    try {
+      await db.runAsync(
+        "UPDATE todos SET active = 1, notificationId = ? WHERE id = ?",
+        notificationID,
+        todoID,
+      );
+    } catch (error) {
+      await cancelNotification(notificationID);
+      console.error("Error toggle todo active:", error);
+    }
   }
 }
 
 export async function deleteTodo(db: SQLiteDatabase, todoID: number) {
-  const data = await db.getFirstAsync<Pick<Todo, "id" | "notificationId">>(
-    "SELECT id, notificationId FROM todos WHERE id = ?",
+  const data = await db.getFirstAsync<Todo>(
+    "SELECT * FROM todos WHERE id = ?",
     todoID,
   );
   if (!data) {
@@ -149,6 +145,6 @@ export async function deleteTodo(db: SQLiteDatabase, todoID: number) {
   if (data.notificationId === "") {
     throw new Error("notificationId is empty");
   }
-  await Notifications.cancelScheduledNotificationAsync(data.notificationId);
+  await cancelNotification(data.notificationId);
   await db.runAsync("DELETE FROM todos WHERE id = ?", todoID);
 }

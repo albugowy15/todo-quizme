@@ -6,7 +6,6 @@ import { QueryProvider } from "../providers/QueryProvier";
 import * as Notifications from "expo-notifications";
 import useNotifications from "../hooks/useNotifications";
 import { RootSiblingParent } from "react-native-root-siblings";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({

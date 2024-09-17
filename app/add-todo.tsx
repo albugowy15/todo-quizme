@@ -4,6 +4,7 @@ import { TodoForm, useTodoForm } from "../components/TodoForm";
 import { addTodo } from "../services/todo";
 
 export default function AddTodoPage() {
+  const db = useDatabase();
   const todoForm = useTodoForm({
     mutationFn: () =>
       addTodo(db, {
@@ -12,6 +13,5 @@ export default function AddTodoPage() {
       }),
     toastMessage: "Todo created!",
   });
-  const db = useDatabase();
   return <TodoForm {...todoForm} />;
 }

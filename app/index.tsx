@@ -26,14 +26,14 @@ export default function Page() {
   const mutateTodoDone = useMutation({
     mutationFn: (todoID: number) => toggleTodoActive(db, todoID),
     onSuccess: () => {
-      showToast({ msg: "Todo active status updated!" });
+      showToast("Todo active status updated!");
       refetch();
     },
   });
   const mutateDeleteTodo = useMutation({
     mutationFn: (todoID: number) => deleteTodo(db, todoID),
     onSuccess: () => {
-      showToast({ msg: "Todo deleted!" });
+      showToast("Todo deleted!");
       refetch();
     },
   });

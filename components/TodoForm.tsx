@@ -22,28 +22,23 @@ export function useTodoForm({
   const mutation = useMutation({
     mutationFn: mutationFn,
     onSuccess: () => {
-      showToast({
-        msg: toastMessage,
-      });
+      showToast(toastMessage);
       router.dismiss();
     },
   });
   const onSaveTodo = () => {
     if (title === "") {
-      showToast({ msg: "Title cannot be empty", variant: "error" });
+      showToast("Title cannot be empty", { variant: "error" });
       return;
     }
     if (!deadline) {
-      showToast({ msg: "Deadline cannot be empty", variant: "error" });
+      showToast("Deadline cannot be empty", { variant: "error" });
       return;
     }
     const today = dayjs();
     const diff = dayjs(deadline).diff(today, "second");
     if (diff < 0) {
-      showToast({
-        msg: "Cannot chose deadline before today",
-        variant: "error",
-      });
+      showToast("Cannot chose deadline before today", { variant: "error" });
       return;
     }
     mutation.mutate();
@@ -69,6 +64,7 @@ export interface TodoFormProps {
   setDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onSaveTodo: () => void;
 }
+
 export const TodoForm = ({
   title,
   dialogVisible,
@@ -104,5 +100,3 @@ export const TodoForm = ({
     </View>
   );
 };
-
-TodoForm;

@@ -12,12 +12,13 @@ interface TodoItemCardProps {
   onDeletePress?: () => void;
 }
 
+const bgColor: Record<"ACTIVE" | "DONE", string> = {
+  DONE: "#16a34a",
+  ACTIVE: "#000",
+};
+
 const TodoItemCard = (props: TodoItemCardProps) => {
   const statusLabel = props.active ? "ACTIVE" : "DONE";
-  const bgColor: Record<"ACTIVE" | "DONE", string> = {
-    DONE: "#16a34a",
-    ACTIVE: "#000",
-  };
   return (
     <TouchableHighlight onPress={props.onItemPress} style={{ marginTop: 8 }}>
       <View

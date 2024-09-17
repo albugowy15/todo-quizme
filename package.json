@@ -10,7 +10,6 @@
     "format": "prettier -w .",
     "format:check": "prettier -c ."
   },
-  "type": "module",
   "dependencies": {
     "@react-native-community/netinfo": "11.3.1",
     "@rneui/base": "^4.0.0-rc.7",

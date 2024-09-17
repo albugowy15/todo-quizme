@@ -6,17 +6,18 @@ import { Dialog } from "@rneui/themed";
 
 const theme = { mainColor: "#0047FF", activeTextColor: "#fff" };
 
+interface DatePickerDialogProps {
+  visible: boolean;
+  deadline: DateType | undefined;
+  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setDeadline: React.Dispatch<React.SetStateAction<DateType | undefined>>;
+}
 const DatePickerDialog = ({
   deadline,
   setDeadline,
   visible,
   setVisible,
-}: {
-  visible: boolean;
-  deadline: DateType | undefined;
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  setDeadline: React.Dispatch<React.SetStateAction<DateType | undefined>>;
-}) => {
+}: DatePickerDialogProps) => {
   return (
     <Dialog isVisible={visible} onBackdropPress={() => setVisible(false)}>
       <View style={styles.datePickerContainer}>
@@ -24,7 +25,7 @@ const DatePickerDialog = ({
           <DateTimePicker
             mode="single"
             date={deadline}
-            locale={"en"}
+            locale="en"
             displayFullDays
             onChange={(params) => setDeadline(params.date)}
             timePicker={true}
@@ -32,13 +33,13 @@ const DatePickerDialog = ({
             selectedItemColor={theme?.mainColor}
             selectedTextStyle={{
               fontWeight: "bold",
-              color: theme?.activeTextColor,
+              color: theme.activeTextColor,
             }}
             todayContainerStyle={{
               borderWidth: 1,
             }}
           />
-          <View style={styles.footer}>
+          <View>
             <View style={styles.footerContainer}>
               <Text>
                 {deadline
@@ -64,7 +65,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     shadowColor: "#000",
   },
-  footer: {},
   footerContainer: {
     gap: 10,
     alignItems: "center",
