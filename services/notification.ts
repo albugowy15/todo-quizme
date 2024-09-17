@@ -1,13 +1,13 @@
 import * as Notifications from "expo-notifications";
 
 interface SendNotification {
-  title?: string;
-  body?: string;
+  title: string;
+  body: string;
   seconds: number;
 }
 
 export async function sendNotification({
-  title = `You've task todo`,
+  title,
   body,
   seconds,
 }: SendNotification) {

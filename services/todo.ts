@@ -43,7 +43,8 @@ export const addTodo = async (db: SQLiteDatabase, value: AddTodoReq) => {
   const today = dayjs();
   const diff = dayjs(value.deadline).diff(today, "second");
   const notificationId = await sendNotification({
-    body: value.title,
+    title: value.title,
+    body: value.deadline,
     seconds: diff,
   });
   try {
@@ -81,7 +82,8 @@ export async function updateTodo(
   const today = dayjs();
   const diff = dayjs(value.deadline).diff(today, "second");
   const notificationID = await sendNotification({
-    body: value.title,
+    title: value.title,
+    body: value.deadline,
     seconds: diff,
   });
   try {
@@ -118,7 +120,8 @@ export async function toggleTodoActive(db: SQLiteDatabase, todoID: number) {
     const today = dayjs();
     const diff = dayjs(data.deadline).diff(today, "second");
     const notificationID = await sendNotification({
-      body: data.title,
+      title: data.title,
+      body: data.deadline,
       seconds: diff,
     });
     try {
